@@ -543,7 +543,7 @@ var _curMachine = null;
 
 // ── API ──────────────────────────────────────────────
 function api(action, payload) {
-  if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbwgmCB4uMciBYcMJVKn5gJTdCtQwY_PF0XAuECB_EG0B00lr6SB62Ew9xkt1G62p46r/exec') return mockApi(action, payload);
+  if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') return mockApi(action, payload);
   var p = new URLSearchParams({ action: action, payload: JSON.stringify(payload || {}) });
   return fetch(SCRIPT_URL + '?' + p)
     .then(function(r){ return r.text(); })
@@ -596,7 +596,7 @@ function loadMachines() {
   grid.innerHTML = '<div style="grid-column:1/-1"><div class="loader"><div class="spinner"></div><p>กำลังโหลด...</p></div></div>';
   api('getMachines').then(function(d) {
     _machines = d.machines || [];
-    if (SCRIPT_URL !== 'https://script.google.com/macros/s/AKfycbwgmCB4uMciBYcMJVKn5gJTdCtQwY_PF0XAuECB_EG0B00lr6SB62Ew9xkt1G62p46r/exec') hide('cfg-alert');
+    if (SCRIPT_URL !== 'YOUR_APPS_SCRIPT_URL_HERE') hide('cfg-alert');
     document.getElementById('machine-sub').textContent = 'เครื่องจักรทั้งหมด ' + _machines.length + ' เครื่อง';
     renderMachines(_machines);
   }).catch(function(e){
