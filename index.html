@@ -3,1083 +3,885 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ระบบอะไหล่เครื่องจักร | Spare Parts Management</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700;800&display=swap" rel="stylesheet">
+<title>Spare Parts System</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg-dark: #0a0e1a;
-    --bg-card: #111827;
-    --bg-card2: #1a2235;
-    --accent: #f59e0b;
-    --accent2: #3b82f6;
-    --accent3: #10b981;
-    --danger: #ef4444;
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --text-muted: #475569;
-    --border: #1e293b;
-    --border2: #2d3f5e;
-    --glow: rgba(245,158,11,0.15);
-    --shadow: 0 4px 24px rgba(0,0,0,0.4);
-  }
+:root {
+  --bg:       #0d1117;
+  --bg2:      #161b22;
+  --bg3:      #21262d;
+  --border:   #30363d;
+  --accent:   #f59e0b;
+  --blue:     #58a6ff;
+  --green:    #3fb950;
+  --red:      #f85149;
+  --purple:   #bc8cff;
+  --text:     #e6edf3;
+  --text2:    #8b949e;
+  --text3:    #484f58;
+  --radius:   10px;
+  --shadow:   0 8px 32px rgba(0,0,0,.5);
+  --font:     'Sarabun', sans-serif;
+  --mono:     'IBM Plex Mono', monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;font-size:15px}
 
-  * { margin:0; padding:0; box-sizing:border-box; }
+/* ── TOPBAR ── */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  height:56px;background:rgba(13,17,23,.95);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(12px);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;gap:12px;
+}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
+.logo-box{
+  width:32px;height:32px;border-radius:7px;
+  background:linear-gradient(135deg,var(--accent),#d97706);
+  display:flex;align-items:center;justify-content:center;font-size:17px;
+}
+.logo-name{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--text);letter-spacing:.5px}
+.logo-name span{color:var(--accent)}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.btn{
+  font-family:var(--font);font-size:13px;font-weight:600;
+  padding:7px 16px;border-radius:7px;border:none;cursor:pointer;
+  transition:all .18s;display:inline-flex;align-items:center;gap:6px;
+  text-decoration:none;white-space:nowrap;
+}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{color:var(--text);border-color:var(--text2)}
+.btn-primary{background:var(--accent);color:#000;font-weight:700}
+.btn-primary:hover{background:#fbbf24;transform:translateY(-1px)}
+.btn-blue{background:rgba(88,166,255,.15);color:var(--blue);border:1px solid rgba(88,166,255,.3)}
+.btn-blue:hover{background:rgba(88,166,255,.25)}
+.btn-green{background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.3)}
+.btn-green:hover{background:rgba(63,185,80,.25)}
+.btn-red{background:rgba(248,81,73,.1);color:var(--red);border:1px solid rgba(248,81,73,.25)}
+.btn-red:hover{background:rgba(248,81,73,.2)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important}
 
-  body {
-    font-family: 'Sarabun', sans-serif;
-    background: var(--bg-dark);
-    color: var(--text-primary);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+/* ── WRAP ── */
+.wrap{max-width:1200px;margin:0 auto;padding:76px 20px 48px;position:relative;z-index:1}
 
-  /* ─── GRID BG ─── */
-  body::before {
-    content:'';
-    position:fixed; inset:0; z-index:0;
-    background-image:
-      linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events:none;
-  }
+/* ── PAGE SYSTEM ── */
+.page{display:none}
+.page.active{display:block;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
-  /* ─── TOPBAR ─── */
-  .topbar {
-    position:fixed; top:0; left:0; right:0; z-index:100;
-    height:60px;
-    background: rgba(10,14,26,0.92);
-    backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--border2);
-    display:flex; align-items:center; justify-content:space-between;
-    padding: 0 20px;
-  }
+/* ── SECTION HEADER ── */
+.sec-header{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  flex-wrap:wrap;gap:12px;margin-bottom:24px;
+}
+.sec-title{font-size:clamp(20px,3vw,28px);font-weight:700;line-height:1.2}
+.sec-title span{color:var(--accent)}
+.sec-sub{color:var(--text2);font-size:13px;margin-top:3px}
 
-  .logo {
-    display:flex; align-items:center; gap:10px;
-  }
-  .logo-icon {
-    width:36px; height:36px;
-    background: linear-gradient(135deg, var(--accent), #d97706);
-    border-radius:8px;
-    display:flex; align-items:center; justify-content:center;
-    font-size:18px;
-  }
-  .logo-text {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size:20px; font-weight:700;
-    letter-spacing:1px;
-    color: var(--text-primary);
-  }
-  .logo-text span { color: var(--accent); }
+/* ── SEARCH ── */
+.search-row{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.search-box{flex:1;min-width:200px;position:relative}
+.search-box input{
+  width:100%;background:var(--bg2);border:1px solid var(--border);
+  border-radius:8px;padding:9px 14px 9px 38px;
+  color:var(--text);font-family:var(--font);font-size:14px;outline:none;
+  transition:border-color .18s;
+}
+.search-box input:focus{border-color:var(--accent)}
+.search-box .ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:15px}
 
-  /* ─── NAV ─── */
-  .nav {
-    display:flex; gap:4px;
-  }
-  .nav-btn {
-    font-family:'Sarabun',sans-serif;
-    font-size:13px; font-weight:600;
-    padding:7px 16px;
-    border-radius:6px;
-    border:none; cursor:pointer;
-    transition:all .2s;
-    background:transparent;
-    color: var(--text-secondary);
-    letter-spacing:.5px;
-  }
-  .nav-btn:hover { background:var(--bg-card2); color:var(--text-primary); }
-  .nav-btn.active {
-    background: linear-gradient(135deg, var(--accent), #d97706);
-    color:#000; font-weight:700;
-  }
-  .nav-btn.add-btn {
-    background: linear-gradient(135deg, var(--accent3), #059669);
-    color:#fff;
-  }
-  .nav-btn.add-btn:hover { opacity:.9; }
+/* ── MACHINE GRID ── */
+.machine-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+  gap:14px;
+}
+.m-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--radius);padding:18px;cursor:pointer;
+  transition:all .2s;position:relative;overflow:hidden;
+}
+.m-card::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--accent),var(--blue));
+  opacity:0;transition:.2s;
+}
+.m-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 24px rgba(245,158,11,.1)}
+.m-card:hover::after{opacity:1}
+.m-card-icon{font-size:28px;margin-bottom:10px}
+.m-card-id{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:1px;margin-bottom:4px}
+.m-card-name{font-size:15px;font-weight:700;margin-bottom:3px;line-height:1.3}
+.m-card-loc{font-size:12px;color:var(--text2);margin-bottom:10px}
+.m-card-foot{display:flex;align-items:center;justify-content:space-between}
+.part-badge{
+  font-size:11px;font-weight:600;
+  background:rgba(63,185,80,.12);color:var(--green);
+  border:1px solid rgba(63,185,80,.25);
+  padding:2px 9px;border-radius:20px;
+}
+.m-card-arrow{color:var(--text3);transition:.18s}
+.m-card:hover .m-card-arrow{color:var(--accent);transform:translateX(3px)}
 
-  /* ─── MAIN CONTENT ─── */
-  .content {
-    padding-top: 80px;
-    padding-bottom: 40px;
-    max-width: 1400px;
-    margin:0 auto;
-    padding-left:20px; padding-right:20px;
-    position:relative; z-index:1;
-  }
+/* ── BACK BTN ── */
+.back-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:13px;font-weight:600;color:var(--text2);
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:7px;padding:6px 13px;cursor:pointer;
+  margin-bottom:18px;transition:.18s;
+}
+.back-btn:hover{color:var(--accent);border-color:var(--accent)}
 
-  /* ─── PAGE HEADER ─── */
-  .page-header {
-    margin-bottom:32px;
-    animation: fadeUp .5s ease both;
-  }
-  .page-title {
-    font-family:'Barlow Condensed',sans-serif;
-    font-size:clamp(28px,4vw,42px);
-    font-weight:800;
-    letter-spacing:2px;
-    line-height:1;
-    margin-bottom:6px;
-  }
-  .page-title span { color:var(--accent); }
-  .page-subtitle {
-    color:var(--text-secondary); font-size:14px;
-  }
-  .page-subtitle b { color:var(--accent2); }
+/* ── MACHINE HEADER ── */
+.m-header{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px 22px;
+  margin-bottom:18px;display:flex;align-items:center;gap:16px;
+  flex-wrap:wrap;
+}
+.m-header-icon{
+  width:54px;height:54px;border-radius:12px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),#d97706);
+  display:flex;align-items:center;justify-content:center;font-size:26px;
+}
+.m-header-info h2{font-size:20px;font-weight:700;margin-bottom:2px}
+.m-header-info p{font-size:13px;color:var(--text2)}
+.chips{display:flex;gap:7px;margin-top:8px;flex-wrap:wrap}
+.chip{
+  font-size:11px;font-weight:600;letter-spacing:.4px;
+  padding:3px 10px;border-radius:20px;
+}
+.chip-blue{background:rgba(88,166,255,.12);color:var(--blue);border:1px solid rgba(88,166,255,.25)}
+.chip-green{background:rgba(63,185,80,.12);color:var(--green);border:1px solid rgba(63,185,80,.25)}
+.chip-amber{background:rgba(245,158,11,.12);color:var(--accent);border:1px solid rgba(245,158,11,.25)}
+.chip-red{background:rgba(248,81,73,.1);color:var(--red);border:1px solid rgba(248,81,73,.2)}
 
-  /* ─── SEARCH BAR ─── */
-  .search-wrap {
-    display:flex; gap:12px; align-items:center;
-    margin-bottom:24px;
-    animation: fadeUp .5s .1s ease both;
-  }
-  .search-box {
-    flex:1; position:relative;
-  }
-  .search-box input {
-    width:100%;
-    background:var(--bg-card);
-    border:1px solid var(--border2);
-    border-radius:10px;
-    padding:11px 16px 11px 44px;
-    color:var(--text-primary);
-    font-family:'Sarabun',sans-serif;
-    font-size:14px;
-    outline:none;
-    transition: border-color .2s;
-  }
-  .search-box input:focus { border-color:var(--accent); }
-  .search-box .icon {
-    position:absolute; left:14px; top:50%; transform:translateY(-50%);
-    color:var(--text-muted); font-size:16px;
-  }
-  .filter-select {
-    background:var(--bg-card);
-    border:1px solid var(--border2);
-    border-radius:10px;
-    padding:11px 14px;
-    color:var(--text-primary);
-    font-family:'Sarabun',sans-serif;
-    font-size:13px;
-    outline:none; cursor:pointer;
-  }
+/* ── TABLE ── */
+.table-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.table-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 18px;border-bottom:1px solid var(--border);
+  flex-wrap:wrap;gap:10px;
+}
+.table-title{font-size:13px;font-weight:700;color:var(--accent);letter-spacing:.5px;font-family:var(--mono)}
+.table-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.table-tools input{
+  background:var(--bg3);border:1px solid var(--border);border-radius:6px;
+  padding:5px 11px;color:var(--text);font-family:var(--font);font-size:12px;
+  outline:none;width:150px;
+}
+.table-tools input:focus{border-color:var(--accent)}
+.table-tools select{
+  background:var(--bg3);border:1px solid var(--border);border-radius:6px;
+  padding:5px 10px;color:var(--text);font-family:var(--font);font-size:12px;outline:none;
+}
+.tscroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{
+  background:var(--bg3);color:var(--text2);
+  font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  padding:10px 14px;text-align:left;white-space:nowrap;
+  border-bottom:1px solid var(--border);
+}
+tbody tr{border-bottom:1px solid rgba(48,54,61,.6);transition:background .12s}
+tbody tr:hover{background:rgba(88,166,255,.03)}
+tbody tr:last-child{border-bottom:none}
+td{padding:10px 14px;vertical-align:middle}
+.part-img{width:42px;height:42px;object-fit:cover;border-radius:7px;border:1px solid var(--border);background:var(--bg3)}
+.no-img{width:42px;height:42px;border-radius:7px;border:1px solid var(--border);background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:18px}
+.mono{font-family:var(--mono);font-size:11px;color:var(--blue)}
+.fw{font-weight:600}
+.tag{font-size:10px;font-weight:700;letter-spacing:.5px;padding:2px 8px;border-radius:12px}
+.tag-mech{background:rgba(245,158,11,.1);color:var(--accent);border:1px solid rgba(245,158,11,.2)}
+.tag-elec{background:rgba(88,166,255,.1);color:var(--blue);border:1px solid rgba(88,166,255,.2)}
+.tag-pneu{background:rgba(63,185,80,.1);color:var(--green);border:1px solid rgba(63,185,80,.2)}
+.tag-cons{background:rgba(248,81,73,.1);color:var(--red);border:1px solid rgba(248,81,73,.2)}
+.tag-other{background:rgba(188,140,255,.1);color:var(--purple);border:1px solid rgba(188,140,255,.2)}
+.qty-ok{color:var(--green);font-weight:700}
+.qty-low{color:var(--red);font-weight:700}
+.qty-warn{color:var(--accent);font-weight:700}
+.td-actions{display:flex;gap:5px;flex-wrap:wrap}
 
-  /* ─── MACHINE GRID ─── */
-  .machine-grid {
-    display:grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px,1fr));
-    gap:16px;
-  }
+/* ── MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;padding:16px;
+}
+.modal-overlay.open{display:flex}
+.modal{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:14px;width:100%;max-width:540px;
+  max-height:90vh;overflow-y:auto;
+  box-shadow:var(--shadow);animation:modalIn .22s ease;
+}
+@keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.modal-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 22px;border-bottom:1px solid var(--border);position:sticky;top:0;
+  background:var(--bg2);z-index:1;
+}
+.modal-head h3{font-size:16px;font-weight:700}
+.modal-close{
+  width:30px;height:30px;border-radius:7px;border:none;
+  background:var(--bg3);color:var(--text2);cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center;transition:.15s;
+}
+.modal-close:hover{background:var(--red);color:#fff}
+.modal-body{padding:22px}
+.modal-foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
 
-  .machine-card {
-    background:var(--bg-card);
-    border:1px solid var(--border);
-    border-radius:14px;
-    padding:20px;
-    cursor:pointer;
-    transition: all .25s;
-    position:relative;
-    overflow:hidden;
-    animation: fadeUp .4s ease both;
-  }
-  .machine-card::before {
-    content:'';
-    position:absolute; top:0; left:0; right:0; height:3px;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    opacity:0; transition:.25s;
-  }
-  .machine-card:hover {
-    border-color:var(--border2);
-    transform:translateY(-3px);
-    box-shadow: 0 8px 32px rgba(245,158,11,.12);
-  }
-  .machine-card:hover::before { opacity:1; }
+/* ── FORM ── */
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px}
+.form-group input,
+.form-group select,
+.form-group textarea{
+  width:100%;background:var(--bg3);border:1px solid var(--border);
+  border-radius:8px;padding:9px 13px;color:var(--text);
+  font-family:var(--font);font-size:14px;outline:none;transition:.18s;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(245,158,11,.1)}
+.form-group select option{background:var(--bg3)}
+.form-group textarea{resize:vertical;min-height:72px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:480px){.form-row,.form-row-3{grid-template-columns:1fr}}
 
-  .machine-num {
-    font-family:'Barlow Condensed',sans-serif;
-    font-size:11px; font-weight:700;
-    letter-spacing:2px;
-    color:var(--accent);
-    margin-bottom:8px;
-  }
-  .machine-icon-wrap {
-    width:52px; height:52px;
-    background:var(--bg-card2);
-    border-radius:12px;
-    display:flex; align-items:center; justify-content:center;
-    font-size:26px;
-    margin-bottom:14px;
-  }
-  .machine-name {
-    font-size:15px; font-weight:700;
-    margin-bottom:4px; line-height:1.3;
-  }
-  .machine-parts-count {
-    font-size:12px; color:var(--text-secondary);
-    display:flex; align-items:center; gap:5px;
-  }
-  .machine-parts-count .dot {
-    width:6px; height:6px; border-radius:50%;
-    background:var(--accent3);
-  }
-  .machine-arrow {
-    position:absolute; right:18px; top:50%; transform:translateY(-50%);
-    color:var(--text-muted); font-size:18px;
-    transition:.2s;
-  }
-  .machine-card:hover .machine-arrow {
-    color:var(--accent); transform:translateY(-50%) translateX(3px);
-  }
+/* image preview */
+.img-preview{
+  width:100%;height:100px;border-radius:8px;
+  border:1px dashed var(--border);background:var(--bg3);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;margin-top:8px;cursor:pointer;transition:.18s;
+}
+.img-preview:hover{border-color:var(--accent)}
+.img-preview img{width:100%;height:100%;object-fit:cover}
+.img-preview-empty{color:var(--text3);font-size:12px;text-align:center;padding:10px}
 
-  /* ─── SPARE PARTS PAGE ─── */
-  .back-btn {
-    display:inline-flex; align-items:center; gap:8px;
-    font-size:13px; font-weight:600;
-    color:var(--text-secondary);
-    background:var(--bg-card);
-    border:1px solid var(--border2);
-    border-radius:8px;
-    padding:8px 14px;
-    cursor:pointer;
-    margin-bottom:20px;
-    transition:.2s;
-  }
-  .back-btn:hover { color:var(--accent); border-color:var(--accent); }
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:999;
+  background:var(--bg2);border-radius:10px;padding:12px 18px;
+  font-size:13px;font-weight:600;box-shadow:var(--shadow);
+  transform:translateX(120%);transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+  border:1px solid var(--border);display:flex;align-items:center;gap:8px;max-width:320px;
+}
+.toast.show{transform:none}
+.toast.ok{border-color:var(--green);color:var(--green)}
+.toast.err{border-color:var(--red);color:var(--red)}
+.toast.warn{border-color:var(--accent);color:var(--accent)}
 
-  .machine-header-bar {
-    background:var(--bg-card);
-    border:1px solid var(--border2);
-    border-radius:14px;
-    padding:20px 24px;
-    margin-bottom:20px;
-    display:flex; align-items:center; gap:16px;
-    animation: fadeUp .3s ease both;
-  }
-  .machine-header-icon {
-    width:56px; height:56px;
-    background:linear-gradient(135deg,var(--accent),#d97706);
-    border-radius:12px;
-    display:flex; align-items:center; justify-content:center;
-    font-size:28px; flex-shrink:0;
-  }
-  .machine-header-info h2 {
-    font-family:'Barlow Condensed',sans-serif;
-    font-size:24px; font-weight:700; letter-spacing:1px;
-  }
-  .machine-header-info p { font-size:13px; color:var(--text-secondary); }
-  .stat-chips {
-    display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;
-  }
-  .stat-chip {
-    font-size:11px; font-weight:600; letter-spacing:.5px;
-    padding:4px 10px; border-radius:20px;
-  }
-  .stat-chip.blue { background:rgba(59,130,246,.15); color:#60a5fa; border:1px solid rgba(59,130,246,.3); }
-  .stat-chip.green { background:rgba(16,185,129,.15); color:#34d399; border:1px solid rgba(16,185,129,.3); }
-  .stat-chip.amber { background:rgba(245,158,11,.15); color:#fbbf24; border:1px solid rgba(245,158,11,.3); }
+/* ── LOADER ── */
+.loader{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px;gap:14px}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader p{font-size:13px;color:var(--text2)}
 
-  /* TABLE */
-  .table-wrap {
-    background:var(--bg-card);
-    border:1px solid var(--border);
-    border-radius:14px;
-    overflow:hidden;
-    animation: fadeUp .35s .05s ease both;
-  }
-  .table-toolbar {
-    display:flex; justify-content:space-between; align-items:center;
-    padding:16px 20px;
-    border-bottom:1px solid var(--border);
-    flex-wrap:wrap; gap:10px;
-  }
-  .table-title {
-    font-family:'Barlow Condensed',sans-serif;
-    font-size:16px; font-weight:700; letter-spacing:1px;
-    color:var(--accent);
-  }
-  .table-actions { display:flex; gap:8px; }
-  .btn-sm {
-    font-family:'Sarabun',sans-serif;
-    font-size:12px; font-weight:600;
-    padding:6px 14px; border-radius:6px;
-    border:none; cursor:pointer; transition:.2s;
-  }
-  .btn-primary { background:var(--accent2); color:#fff; }
-  .btn-primary:hover { background:#2563eb; }
-  .btn-success { background:var(--accent3); color:#fff; }
-  .btn-success:hover { background:#059669; }
-  .btn-outline {
-    background:transparent;
-    border:1px solid var(--border2);
-    color:var(--text-secondary);
-  }
-  .btn-outline:hover { border-color:var(--accent); color:var(--accent); }
+/* ── EMPTY ── */
+.empty{text-align:center;padding:50px 20px}
+.empty-ico{font-size:48px;opacity:.3;margin-bottom:12px}
+.empty p{color:var(--text2);font-size:14px}
 
-  .table-scroll { overflow-x:auto; }
-  table {
-    width:100%; border-collapse:collapse;
-    font-size:13px;
-  }
-  thead th {
-    background:var(--bg-card2);
-    color:var(--text-secondary);
-    font-weight:700; font-size:11px;
-    letter-spacing:1px; text-transform:uppercase;
-    padding:12px 14px;
-    text-align:left; white-space:nowrap;
-    border-bottom:1px solid var(--border2);
-  }
-  tbody tr {
-    border-bottom:1px solid var(--border);
-    transition:background .15s;
-  }
-  tbody tr:hover { background:rgba(59,130,246,.04); }
-  tbody tr:last-child { border-bottom:none; }
-  td {
-    padding:11px 14px;
-    vertical-align:middle;
-  }
-  td .item-img {
-    width:44px; height:44px; object-fit:cover;
-    border-radius:8px; border:1px solid var(--border2);
-    background:var(--bg-card2);
-  }
-  td .no-img {
-    width:44px; height:44px;
-    border-radius:8px; border:1px solid var(--border2);
-    background:var(--bg-card2);
-    display:flex; align-items:center; justify-content:center;
-    color:var(--text-muted); font-size:18px;
-  }
-  .item-code { font-family:'Barlow Condensed',sans-serif; font-weight:600; color:var(--accent2); }
-  .item-name { font-weight:600; }
-  .item-type {
-    font-size:11px; font-weight:600; letter-spacing:.5px;
-    padding:3px 9px; border-radius:12px;
-  }
-  .type-mech { background:rgba(245,158,11,.12); color:#fbbf24; border:1px solid rgba(245,158,11,.25); }
-  .type-elec { background:rgba(59,130,246,.12); color:#60a5fa; border:1px solid rgba(59,130,246,.25); }
-  .type-pneu { background:rgba(16,185,129,.12); color:#34d399; border:1px solid rgba(16,185,129,.25); }
-  .type-cons { background:rgba(239,68,68,.12); color:#f87171; border:1px solid rgba(239,68,68,.25); }
+/* ── CONFIG ALERT ── */
+.config-alert{
+  background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);
+  border-radius:10px;padding:14px 18px;margin-bottom:22px;
+  display:flex;gap:12px;align-items:flex-start;
+}
+.config-alert .ico{font-size:20px;flex-shrink:0;margin-top:1px}
+.config-alert b{color:var(--accent);font-size:13px}
+.config-alert p{font-size:12px;color:var(--text2);margin-top:3px;line-height:1.6}
+code{background:rgba(0,0,0,.4);border-radius:4px;padding:1px 6px;font-family:var(--mono);font-size:11px;color:var(--purple)}
 
-  .stock-ok { color:var(--accent3); font-weight:700; }
-  .stock-low { color:var(--danger); font-weight:700; }
-  .stock-warn { color:var(--accent); font-weight:700; }
-
-  td .min-max {
-    font-size:11px; color:var(--text-muted);
-    display:flex; flex-direction:column;
-  }
-  td .min-max span { white-space:nowrap; }
-
-  .price-cell { font-family:'Barlow Condensed',sans-serif; font-weight:600; color:var(--text-primary); }
-
-  /* ─── ADD PAGE ─── */
-  .add-grid {
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:20px;
-  }
-  @media(max-width:768px){ .add-grid { grid-template-columns:1fr; } }
-
-  .form-card {
-    background:var(--bg-card);
-    border:1px solid var(--border);
-    border-radius:14px;
-    padding:24px;
-    animation: fadeUp .4s ease both;
-  }
-  .form-card.full { grid-column:1/-1; }
-  .form-card-title {
-    font-family:'Barlow Condensed',sans-serif;
-    font-size:18px; font-weight:700; letter-spacing:1px;
-    margin-bottom:20px;
-    padding-bottom:12px;
-    border-bottom:1px solid var(--border2);
-    display:flex; align-items:center; gap:10px;
-  }
-  .form-card-title .icon-circle {
-    width:32px; height:32px; border-radius:8px;
-    display:flex; align-items:center; justify-content:center;
-    font-size:15px;
-  }
-  .form-card-title.amber .icon-circle { background:rgba(245,158,11,.15); }
-  .form-card-title.blue .icon-circle { background:rgba(59,130,246,.15); }
-
-  .form-group {
-    margin-bottom:16px;
-  }
-  .form-group label {
-    display:block; font-size:12px; font-weight:600;
-    color:var(--text-secondary); margin-bottom:6px;
-    letter-spacing:.5px; text-transform:uppercase;
-  }
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    width:100%;
-    background:var(--bg-card2);
-    border:1px solid var(--border2);
-    border-radius:8px;
-    padding:10px 14px;
-    color:var(--text-primary);
-    font-family:'Sarabun',sans-serif;
-    font-size:14px;
-    outline:none;
-    transition: border-color .2s, box-shadow .2s;
-  }
-  .form-group input:focus,
-  .form-group select:focus,
-  .form-group textarea:focus {
-    border-color:var(--accent);
-    box-shadow: 0 0 0 3px rgba(245,158,11,.1);
-  }
-  .form-group select option { background:var(--bg-card2); }
-  .form-group textarea { resize:vertical; min-height:80px; }
-
-  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-  .form-row-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
-  @media(max-width:480px){ .form-row,.form-row-3 { grid-template-columns:1fr; } }
-
-  .upload-area {
-    border:2px dashed var(--border2);
-    border-radius:10px;
-    padding:24px;
-    text-align:center;
-    cursor:pointer;
-    transition:.2s;
-  }
-  .upload-area:hover { border-color:var(--accent); background:rgba(245,158,11,.04); }
-  .upload-area .up-icon { font-size:32px; margin-bottom:8px; }
-  .upload-area p { font-size:13px; color:var(--text-secondary); }
-  .upload-area .up-label { font-size:11px; color:var(--text-muted); margin-top:4px; }
-
-  .submit-btn {
-    width:100%; padding:14px;
-    font-family:'Sarabun',sans-serif;
-    font-size:15px; font-weight:700;
-    letter-spacing:.5px;
-    border:none; border-radius:10px; cursor:pointer;
-    transition:.2s;
-    margin-top:8px;
-  }
-  .submit-btn.amber {
-    background:linear-gradient(135deg,var(--accent),#d97706);
-    color:#000;
-  }
-  .submit-btn.blue {
-    background:linear-gradient(135deg,var(--accent2),#1d4ed8);
-    color:#fff;
-  }
-  .submit-btn:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(0,0,0,.3); }
-  .submit-btn:active { transform:none; }
-
-  /* ─── MODALS / TOAST ─── */
-  .toast {
-    position:fixed; bottom:24px; right:24px; z-index:999;
-    background:var(--bg-card);
-    border:1px solid var(--accent3);
-    border-radius:12px;
-    padding:14px 20px;
-    font-size:14px; font-weight:600;
-    color:var(--accent3);
-    box-shadow:0 8px 32px rgba(0,0,0,.4);
-    display:flex; align-items:center; gap:10px;
-    transform:translateX(120%);
-    transition:transform .3s cubic-bezier(.34,1.56,.64,1);
-  }
-  .toast.show { transform:translateX(0); }
-  .toast.error { border-color:var(--danger); color:var(--danger); }
-
-  /* ─── LOADING ─── */
-  .loader-wrap {
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    padding:60px 0; gap:16px;
-  }
-  .spinner {
-    width:40px; height:40px;
-    border:3px solid var(--border2);
-    border-top-color:var(--accent);
-    border-radius:50%;
-    animation:spin .8s linear infinite;
-  }
-  @keyframes spin { to{transform:rotate(360deg)} }
-  .loader-text { font-size:13px; color:var(--text-secondary); }
-
-  /* ─── EMPTY STATE ─── */
-  .empty-state {
-    text-align:center; padding:60px 20px;
-  }
-  .empty-icon { font-size:56px; margin-bottom:16px; opacity:.4; }
-  .empty-text { color:var(--text-secondary); font-size:15px; }
-
-  /* ─── STATUS BADGE ─── */
-  .status-badge {
-    display:inline-flex; align-items:center; gap:5px;
-    font-size:11px; font-weight:700; letter-spacing:.5px;
-    padding:3px 10px; border-radius:20px;
-  }
-  .status-ok { background:rgba(16,185,129,.12); color:#34d399; border:1px solid rgba(16,185,129,.3); }
-  .status-low { background:rgba(239,68,68,.12); color:#f87171; border:1px solid rgba(239,68,68,.3); }
-  .status-warn { background:rgba(245,158,11,.12); color:#fbbf24; border:1px solid rgba(245,158,11,.3); }
-
-  /* ─── ANIMATIONS ─── */
-  @keyframes fadeUp {
-    from { opacity:0; transform:translateY(16px); }
-    to   { opacity:1; transform:translateY(0); }
-  }
-
-  /* ─── RESPONSIVE ─── */
-  @media(max-width:600px){
-    .topbar { padding:0 12px; }
-    .nav-btn { padding:6px 10px; font-size:12px; }
-    .content { padding-left:12px; padding-right:12px; }
-    .machine-grid { grid-template-columns:1fr 1fr; }
-    thead th:nth-child(n+7) { display:none; }
-    td:nth-child(n+7) { display:none; }
-  }
-  @media(max-width:400px){
-    .machine-grid { grid-template-columns:1fr; }
-    .nav .logo-text { display:none; }
-  }
-
-  /* ─── CONFIG BANNER ─── */
-  .config-banner {
-    background:linear-gradient(135deg,rgba(245,158,11,.15),rgba(59,130,246,.08));
-    border:1px solid rgba(245,158,11,.3);
-    border-radius:12px; padding:16px 20px;
-    margin-bottom:24px;
-    display:flex; align-items:flex-start; gap:12px;
-  }
-  .config-banner .icon { font-size:24px; flex-shrink:0; }
-  .config-banner h3 { font-size:14px; font-weight:700; margin-bottom:6px; color:var(--accent); }
-  .config-banner p { font-size:12px; color:var(--text-secondary); line-height:1.7; }
-  .config-banner code {
-    background:rgba(0,0,0,.3); border-radius:4px;
-    padding:1px 6px; font-family:monospace; font-size:11px;
-    color:#a78bfa;
-  }
-
-  .page { display:none; }
-  .page.active { display:block; }
+/* ── RESPONSIVE ── */
+@media(max-width:600px){
+  .machine-grid{grid-template-columns:1fr 1fr}
+  thead th:nth-child(n+8){display:none}
+  td:nth-child(n+8){display:none}
+  .topbar{padding:0 12px}
+}
+@media(max-width:380px){
+  .machine-grid{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 
-<!-- TOPBAR -->
+<!-- ════════ TOPBAR ════════ -->
 <div class="topbar">
-  <div class="logo">
-    <div class="logo-icon">⚙️</div>
-    <div class="logo-text">SPARE<span>PARTS</span></div>
-  </div>
-  <div class="nav">
-    <button class="nav-btn active" onclick="showPage('main')">🏭 MAIN</button>
-    <button class="nav-btn" onclick="showPage('spare')">🔧 SPARE PART</button>
-    <button class="nav-btn add-btn" onclick="showPage('add')">＋ ADD</button>
+  <a class="logo" onclick="goMain()">
+    <div class="logo-box">⚙️</div>
+    <div class="logo-name">SPARE<span>PARTS</span></div>
+  </a>
+  <div class="topbar-right">
+    <button class="btn btn-ghost btn-sm" onclick="goMain()">🏭 Machines</button>
+    <button class="btn btn-primary btn-sm" onclick="openAddMachineModal()">+ เครื่องจักร</button>
   </div>
 </div>
 
-<!-- CONTENT -->
-<div class="content">
+<!-- ════════ CONTENT ════════ -->
+<div class="wrap">
 
-  <!-- ══════════════ PAGE: MAIN ══════════════ -->
+  <!-- PAGE: MAIN -->
   <div class="page active" id="page-main">
-    <div class="page-header">
-      <div class="page-title">รายการ<span>เครื่องจักร</span></div>
-      <div class="page-subtitle">MACHINE LIST — รวมเครื่องจักรทั้งหมดในระบบ | <b id="machine-count">0</b> เครื่อง</div>
-    </div>
-
-    <div class="config-banner" id="config-banner">
-      <div class="icon">⚡</div>
+    <div class="sec-header">
       <div>
-        <h3>ตั้งค่า Google Apps Script URL</h3>
-        <p>
-          แก้ไขค่า <code>APPS_SCRIPT_URL</code> ในไฟล์ <code>index.html</code> บรรทัดแรกของ &lt;script&gt;
-          ให้ตรงกับ Web App URL ที่ Deploy จาก Google Apps Script ของคุณ<br>
-          จากนั้น reload หน้าเว็บ ระบบจะดึงข้อมูลจาก Google Sheets อัตโนมัติ
-        </p>
+        <div class="sec-title">รายการ<span>เครื่องจักร</span></div>
+        <div class="sec-sub" id="machine-sub">กำลังโหลด...</div>
       </div>
     </div>
 
-    <div class="search-wrap">
+    <div class="config-alert" id="cfg-alert">
+      <div class="ico">⚡</div>
+      <div>
+        <b>ตั้งค่า Apps Script URL ก่อนใช้งาน</b>
+        <p>แก้ไข <code>SCRIPT_URL</code> ในไฟล์ <code>index.html</code> บรรทัดแรกของ &lt;script&gt; ให้ตรงกับ Web App URL จาก Google Apps Script แล้ว reload หน้าเว็บ</p>
+      </div>
+    </div>
+
+    <div class="search-row">
       <div class="search-box">
-        <span class="icon">🔍</span>
-        <input type="text" placeholder="ค้นหาเครื่องจักร..." id="search-machine" oninput="filterMachines()">
+        <span class="ico">🔍</span>
+        <input type="text" placeholder="ค้นหาเครื่องจักร..." id="search-m" oninput="filterMachines()">
       </div>
     </div>
 
     <div class="machine-grid" id="machine-grid">
-      <div class="loader-wrap" style="grid-column:1/-1">
-        <div class="spinner"></div>
-        <div class="loader-text">กำลังโหลดข้อมูลเครื่องจักร...</div>
-      </div>
+      <div style="grid-column:1/-1"><div class="loader"><div class="spinner"></div><p>กำลังโหลด...</p></div></div>
     </div>
   </div>
 
-  <!-- ══════════════ PAGE: SPARE PART LIST ══════════════ -->
-  <div class="page" id="page-spare">
-    <button class="back-btn" onclick="showPage('main')">← กลับหน้าหลัก</button>
+  <!-- PAGE: DETAIL -->
+  <div class="page" id="page-detail">
+    <button class="back-btn" onclick="goMain()">← กลับ</button>
 
-    <div class="machine-header-bar" id="machine-detail-header">
-      <div class="machine-header-icon" id="detail-icon">⚙️</div>
-      <div class="machine-header-info">
-        <h2 id="detail-name">—</h2>
-        <p id="detail-id">Machine Code: —</p>
-        <div class="stat-chips">
-          <span class="stat-chip blue" id="detail-total">รายการ: 0</span>
-          <span class="stat-chip green" id="detail-ok">OK: 0</span>
-          <span class="stat-chip amber" id="detail-low">ต่ำกว่า Min: 0</span>
-        </div>
+    <div class="m-header" id="m-header">
+      <div class="m-header-icon" id="mh-icon">⚙️</div>
+      <div class="m-header-info">
+        <h2 id="mh-name">—</h2>
+        <p id="mh-sub">—</p>
+        <div class="chips" id="mh-chips"></div>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <button class="btn btn-ghost btn-sm" onclick="openEditMachineModal()">✏️ แก้ไข</button>
+        <button class="btn btn-green btn-sm" onclick="openAddPartModal()">+ เพิ่มอะไหล่</button>
       </div>
     </div>
 
-    <div class="table-wrap">
-      <div class="table-toolbar">
-        <span class="table-title">📦 รายการอะไหล่ทั้งหมด</span>
-        <div class="table-actions">
-          <input type="text" class="btn-outline btn-sm" placeholder="🔍 ค้นหาอะไหล่..." id="search-parts" oninput="filterParts()" style="border-radius:6px;padding:6px 12px;font-family:'Sarabun',sans-serif;background:var(--bg-card2);color:var(--text-primary);border:1px solid var(--border2);font-size:12px;outline:none;width:160px;">
-          <select class="btn-outline btn-sm" id="filter-type" onchange="filterParts()" style="border-radius:6px;padding:6px 10px;font-family:'Sarabun',sans-serif;background:var(--bg-card2);color:var(--text-primary);border:1px solid var(--border2);font-size:12px;outline:none;">
+    <div class="table-card">
+      <div class="table-bar">
+        <span class="table-title">📦 SPARE PARTS LIST</span>
+        <div class="table-tools">
+          <input type="text" placeholder="🔍 ค้นหาอะไหล่..." id="search-p" oninput="filterParts()">
+          <select id="filter-type" onchange="filterParts()">
             <option value="">ทุกประเภท</option>
-            <option value="Mechanical">Mechanical</option>
-            <option value="Electrical">Electrical</option>
-            <option value="Pneumatic">Pneumatic</option>
-            <option value="Consumable">Consumable</option>
+            <option>Mechanical</option>
+            <option>Electrical</option>
+            <option>Pneumatic</option>
+            <option>Consumable</option>
+            <option>Other</option>
           </select>
-          <button class="btn-sm btn-success" onclick="showAddPartForMachine()">+ เพิ่มอะไหล่</button>
         </div>
       </div>
-      <div class="table-scroll">
+      <div class="tscroll">
         <table>
           <thead>
             <tr>
               <th>#</th>
-              <th>รูปภาพ</th>
-              <th>ITEM CODE</th>
-              <th>ชื่อรายการอะไหล่</th>
+              <th>รูป</th>
+              <th>Part No.</th>
+              <th>ชื่ออะไหล่</th>
               <th>จำนวน</th>
               <th>หน่วย</th>
-              <th>ราคา (บาท)</th>
+              <th>ราคา</th>
               <th>ประเภท</th>
-              <th>MIN</th>
-              <th>MAX</th>
-              <th>สถานะ</th>
+              <th>Min</th>
+              <th>Max</th>
+              <th>หมายเหตุ</th>
+              <th>จัดการ</th>
             </tr>
           </thead>
-          <tbody id="parts-tbody">
-            <tr><td colspan="11"><div class="loader-wrap"><div class="spinner"></div></div></td></tr>
-          </tbody>
+          <tbody id="parts-tbody"></tbody>
         </table>
       </div>
     </div>
   </div>
 
-  <!-- ══════════════ PAGE: ADD ══════════════ -->
-  <div class="page" id="page-add">
-    <div class="page-header">
-      <div class="page-title">ADD<span> ข้อมูล</span></div>
-      <div class="page-subtitle">เพิ่มเครื่องจักรใหม่ และ เพิ่มอะไหล่ใหม่</div>
+</div><!-- /wrap -->
+
+<!-- ════════ MODAL: ADD/EDIT MACHINE ════════ -->
+<div class="modal-overlay" id="modal-machine">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modal-machine-title">➕ เพิ่มเครื่องจักรใหม่</h3>
+      <button class="modal-close" onclick="closeModal('modal-machine')">✕</button>
     </div>
-
-    <div class="add-grid">
-
-      <!-- ADD MACHINE -->
-      <div class="form-card">
-        <div class="form-card-title amber">
-          <div class="icon-circle">🏭</div>
-          เพิ่มเครื่องจักรใหม่
+    <div class="modal-body">
+      <input type="hidden" id="fm-edit-id">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Machine ID *</label>
+          <input type="text" id="fm-id" placeholder="เช่น M001">
         </div>
         <div class="form-group">
-          <label>รหัสเครื่องจักร *</label>
-          <input type="text" id="new-machine-id" placeholder="เช่น M001, XRAY-01">
+          <label>ไอคอน (Emoji)</label>
+          <input type="text" id="fm-icon" placeholder="⚙️" maxlength="4">
         </div>
-        <div class="form-group">
-          <label>ชื่อเครื่องจักร *</label>
-          <input type="text" id="new-machine-name" placeholder="เช่น X-RAY Machine, Weighing Scale">
-        </div>
-        <div class="form-group">
-          <label>ชื่อเครื่องจักร (ภาษาไทย)</label>
-          <input type="text" id="new-machine-name-th" placeholder="เช่น เครื่องชั่ง, เครื่องตรวจโลหะ">
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>ประเภทเครื่องจักร</label>
-            <select id="new-machine-type">
-              <option>Processing</option>
-              <option>Packing</option>
-              <option>Inspection</option>
-              <option>Utility</option>
-              <option>Cleaning</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>ไอคอน (Emoji)</label>
-            <input type="text" id="new-machine-icon" placeholder="⚙️" maxlength="4">
-          </div>
-        </div>
-        <div class="form-group">
-          <label>รายละเอียด / หมายเหตุ</label>
-          <textarea id="new-machine-note" placeholder="รายละเอียดเพิ่มเติมเกี่ยวกับเครื่องจักร..."></textarea>
-        </div>
-        <button class="submit-btn amber" onclick="addMachine()">+ เพิ่มเครื่องจักร</button>
       </div>
-
-      <!-- ADD SPARE PART -->
-      <div class="form-card">
-        <div class="form-card-title blue">
-          <div class="icon-circle">🔩</div>
-          เพิ่มอะไหล่ใหม่
-        </div>
-        <div class="form-group">
-          <label>เครื่องจักร *</label>
-          <select id="new-part-machine">
-            <option value="">-- เลือกเครื่องจักร --</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>ITEM CODE *</label>
-            <input type="text" id="new-part-code" placeholder="เช่น SKF-6205">
-          </div>
-          <div class="form-group">
-            <label>ประเภทอะไหล่</label>
-            <select id="new-part-type">
-              <option>Mechanical</option>
-              <option>Electrical</option>
-              <option>Pneumatic</option>
-              <option>Consumable</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>ชื่อรายการอะไหล่ *</label>
-          <input type="text" id="new-part-name" placeholder="เช่น Bearing 6205, Belt V-type">
-        </div>
-        <div class="form-row-3">
-          <div class="form-group">
-            <label>จำนวน *</label>
-            <input type="number" id="new-part-qty" placeholder="0" min="0">
-          </div>
-          <div class="form-group">
-            <label>หน่วย</label>
-            <input type="text" id="new-part-unit" placeholder="ชิ้น/อัน">
-          </div>
-          <div class="form-group">
-            <label>ราคา (บาท)</label>
-            <input type="number" id="new-part-price" placeholder="0.00" min="0">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Min Stock</label>
-            <input type="number" id="new-part-min" placeholder="0" min="0">
-          </div>
-          <div class="form-group">
-            <label>Max Stock</label>
-            <input type="number" id="new-part-max" placeholder="0" min="0">
-          </div>
-        </div>
-        <div class="form-group">
-          <label>URL รูปภาพ (ไม่บังคับ)</label>
-          <input type="text" id="new-part-img" placeholder="https://...">
-        </div>
-        <div class="form-group">
-          <label>หมายเหตุ</label>
-          <input type="text" id="new-part-note" placeholder="หมายเหตุเพิ่มเติม...">
-        </div>
-        <button class="submit-btn blue" onclick="addSparePart()">+ เพิ่มอะไหล่</button>
+      <div class="form-group">
+        <label>ชื่อเครื่องจักร *</label>
+        <input type="text" id="fm-name" placeholder="เช่น Weighing Machine">
       </div>
-
+      <div class="form-group">
+        <label>Location / Line</label>
+        <input type="text" id="fm-loc" placeholder="เช่น Line 1, Zone A">
+      </div>
+      <div class="form-group">
+        <label>รายละเอียด</label>
+        <textarea id="fm-desc" placeholder="คำอธิบายเครื่องจักร..."></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('modal-machine')">ยกเลิก</button>
+      <button class="btn btn-primary" id="fm-submit" onclick="submitMachine()">💾 บันทึก</button>
     </div>
   </div>
+</div>
 
+<!-- ════════ MODAL: ADD/EDIT PART ════════ -->
+<div class="modal-overlay" id="modal-part">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modal-part-title">➕ เพิ่มอะไหล่ใหม่</h3>
+      <button class="modal-close" onclick="closeModal('modal-part')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="fp-edit-id">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Part Number / Item Code</label>
+          <input type="text" id="fp-number" placeholder="เช่น SKF-6205">
+        </div>
+        <div class="form-group">
+          <label>ประเภทอะไหล่</label>
+          <select id="fp-type">
+            <option>Mechanical</option>
+            <option>Electrical</option>
+            <option>Pneumatic</option>
+            <option>Consumable</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>ชื่อรายการอะไหล่ *</label>
+        <input type="text" id="fp-name" placeholder="เช่น Bearing 6205 2RS">
+      </div>
+      <div class="form-row-3">
+        <div class="form-group">
+          <label>จำนวน (Stock)</label>
+          <input type="number" id="fp-qty" placeholder="0" min="0">
+        </div>
+        <div class="form-group">
+          <label>หน่วย</label>
+          <input type="text" id="fp-unit" placeholder="ชิ้น/อัน/เส้น">
+        </div>
+        <div class="form-group">
+          <label>ราคา (บาท)</label>
+          <input type="number" id="fp-price" placeholder="0" min="0">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Min Stock</label>
+          <input type="number" id="fp-min" placeholder="0" min="0">
+        </div>
+        <div class="form-group">
+          <label>Max Stock</label>
+          <input type="number" id="fp-max" placeholder="0" min="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>URL รูปภาพ</label>
+        <input type="text" id="fp-img" placeholder="https://... หรือ Google Drive link" oninput="previewImg()">
+        <div class="img-preview" id="img-preview" onclick="document.getElementById('fp-img').focus()">
+          <div class="img-preview-empty">🖼️<br>วาง URL รูปภาพแล้วจะแสดงตัวอย่างที่นี่</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>หมายเหตุ</label>
+        <input type="text" id="fp-note" placeholder="หมายเหตุเพิ่มเติม...">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('modal-part')">ยกเลิก</button>
+      <button class="btn btn-primary" id="fp-submit" onclick="submitPart()">💾 บันทึก</button>
+    </div>
+  </div>
 </div>
 
 <!-- TOAST -->
-<div class="toast" id="toast">✅ <span id="toast-msg">บันทึกสำเร็จ!</span></div>
+<div class="toast" id="toast"><span id="toast-ico"></span><span id="toast-msg"></span></div>
 
 <script>
-// ================================================================
-// ⚙️ CONFIG — แก้ไขค่านี้ให้ตรงกับ Google Apps Script Web App URL
-// ================================================================
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwy7Ap5BO9gRy7nONyhUwD_gTfP-9-CLFt-jBveNwyRHa6_RUzQrJwH_5SATBIOwipH3g/exec';
-// ================================================================
+// ═══════════════════════════════════════════════════════
+//  ⚙️  CONFIG — แก้ไข URL นี้ให้ตรงกับ Apps Script ของคุณ
+// ═══════════════════════════════════════════════════════
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4iOAA_WJl3b_Juk_E282Xd7TGycTNfS1lE1ze-F9oeHBrAzqX3eBIj6whQOe5a6OxOA/exec';
+// ═══════════════════════════════════════════════════════
 
-let allMachines = [];
-let allParts = [];
-let currentMachineId = null;
+var _machines = [];
+var _parts    = [];
+var _curMachine = null;
 
-// ─── PAGE ROUTING ───
-function showPage(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + page).classList.add('active');
-  const idx = ['main','spare','add'].indexOf(page);
-  document.querySelectorAll('.nav-btn')[idx]?.classList.add('active');
-  window.scrollTo(0,0);
+// ── API ──────────────────────────────────────────────
+function api(action, payload) {
+  if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') return mockApi(action, payload);
+  var p = new URLSearchParams({ action: action, payload: JSON.stringify(payload || {}) });
+  return fetch(SCRIPT_URL + '?' + p)
+    .then(function(r){ return r.text(); })
+    .then(function(t){
+      try { return JSON.parse(t); }
+      catch(e){ throw new Error('Response ไม่ใช่ JSON'); }
+    });
 }
 
-// ─── TOAST ───
-function toast(msg, type='ok') {
-  const el = document.getElementById('toast');
-  const msgEl = document.getElementById('toast-msg');
-  el.className = 'toast' + (type==='error' ? ' error' : '');
-  msgEl.textContent = msg;
-  el.querySelector? el.innerHTML = (type==='error'?'❌':'✅') + ' <span>' + msg + '</span>' : null;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 3000);
+// ── MOCK DATA ─────────────────────────────────────────
+function mockApi(action, payload) {
+  var MOCK_MACHINES = [
+    {machine_id:'M001',machine_name:'Weighing Machine',location:'Line 1',description:'เครื่องชั่งน้ำหนัก',icon:'⚖️',part_count:3},
+    {machine_id:'M002',machine_name:'X-RAY Inspection',location:'Line 2',description:'เครื่องตรวจ X-RAY',icon:'🔬',part_count:2},
+    {machine_id:'M003',machine_name:'Auto Debone',location:'Line 1',description:'เครื่อง Debone อัตโนมัติ',icon:'🔄',part_count:1},
+    {machine_id:'M004',machine_name:'CCM Machine',location:'Line 3',description:'เครื่อง CCM',icon:'📦',part_count:0},
+    {machine_id:'M005',machine_name:'Metal Detector',location:'Line 2',description:'เครื่องตรวจโลหะ',icon:'🔍',part_count:0},
+  ];
+  var MOCK_PARTS = [
+    {part_id:'P001',machine_id:'M001',part_name:'Bearing 6205 2RS',part_number:'SKF-6205',stock_qty:8,unit:'ชิ้น',price:350,type:'Mechanical',min_stock:5,max_stock:20,image_url:'',note:''},
+    {part_id:'P002',machine_id:'M001',part_name:'V-Belt A78',part_number:'BLT-A78',stock_qty:3,unit:'เส้น',price:180,type:'Mechanical',min_stock:4,max_stock:15,image_url:'',note:''},
+    {part_id:'P003',machine_id:'M001',part_name:'Circuit Breaker 10A',part_number:'CB-10A',stock_qty:2,unit:'ชิ้น',price:450,type:'Electrical',min_stock:2,max_stock:10,image_url:'',note:'สำรอง'},
+    {part_id:'P004',machine_id:'M002',part_name:'Fuse 5A',part_number:'FUSE-5A',stock_qty:10,unit:'ชิ้น',price:25,type:'Electrical',min_stock:5,max_stock:30,image_url:'',note:''},
+    {part_id:'P005',machine_id:'M002',part_name:'Air Filter',part_number:'AF-01',stock_qty:1,unit:'ชุด',price:1200,type:'Pneumatic',min_stock:1,max_stock:3,image_url:'',note:''},
+    {part_id:'P006',machine_id:'M003',part_name:'Blade Assembly',part_number:'BLD-03',stock_qty:2,unit:'ชุด',price:3500,type:'Mechanical',min_stock:1,max_stock:5,image_url:'',note:''},
+  ];
+  if (action === 'getMachines') return Promise.resolve({ machines: MOCK_MACHINES });
+  if (action === 'getParts')    return Promise.resolve({ parts: MOCK_PARTS.filter(function(p){ return !payload.machine_id || p.machine_id === payload.machine_id; }) });
+  if (action === 'addMachine' || action === 'editMachine') return Promise.resolve({ success: true, message: '(Demo) บันทึกสำเร็จ' });
+  if (action === 'addPart' || action === 'editPart')       return Promise.resolve({ success: true, message: '(Demo) บันทึกสำเร็จ' });
+  if (action === 'deletePart') return Promise.resolve({ success: true });
+  return Promise.resolve({});
 }
 
-// ─── FETCH WRAPPER ───
-async function apiFetch(action, data={}) {
-  if(APPS_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbwy7Ap5BO9gRy7nONyhUwD_gTfP-9-CLFt-jBveNwyRHa6_RUzQrJwH_5SATBIOwipH3g/exec') {
-    // Demo mode — load mock data
-    return getMockData(action, data);
-  }
-  const url = APPS_SCRIPT_URL + '?action=' + action;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify(data),
-    mode: 'cors'
+// ── PAGES ─────────────────────────────────────────────
+function goMain() {
+  show('page-main');
+  _curMachine = null;
+  loadMachines();
+}
+function show(id) {
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ── MACHINES ─────────────────────────────────────────
+function loadMachines() {
+  var grid = document.getElementById('machine-grid');
+  grid.innerHTML = '<div style="grid-column:1/-1"><div class="loader"><div class="spinner"></div><p>กำลังโหลด...</p></div></div>';
+  api('getMachines').then(function(d) {
+    _machines = d.machines || [];
+    if (SCRIPT_URL !== 'YOUR_APPS_SCRIPT_URL_HERE') hide('cfg-alert');
+    document.getElementById('machine-sub').textContent = 'เครื่องจักรทั้งหมด ' + _machines.length + ' เครื่อง';
+    renderMachines(_machines);
+  }).catch(function(e){
+    grid.innerHTML = '<div style="grid-column:1/-1"><div class="empty"><div class="empty-ico">⚠️</div><p>โหลดข้อมูลไม่สำเร็จ<br>' + e.message + '</p></div></div>';
   });
-  return res.json();
 }
 
-// ─── LOAD MACHINES ───
-async function loadMachines() {
-  const grid = document.getElementById('machine-grid');
-  grid.innerHTML = '<div class="loader-wrap" style="grid-column:1/-1"><div class="spinner"></div><div class="loader-text">กำลังโหลด...</div></div>';
-  try {
-    const data = await apiFetch('getMachines');
-    allMachines = data.machines || [];
-    document.getElementById('machine-count').textContent = allMachines.length;
-    // Hide config banner if URL is set
-    if(APPS_SCRIPT_URL !== 'https://script.google.com/macros/s/AKfycbx2z8cJPCB5_2KSlmYA3fW9RGXp00A1Pk7ltWWqEzegGRlW9yeQngRZb1P4njSNHeYC-Q/exec') {
-      document.getElementById('config-banner').style.display='none';
-    }
-    renderMachines(allMachines);
-    populateMachineSelect();
-  } catch(e) {
-    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">⚠️</div><div class="empty-text">ไม่สามารถโหลดข้อมูลได้<br>กรุณาตั้งค่า Apps Script URL</div></div>';
-  }
-}
-
-function renderMachines(machines) {
-  const grid = document.getElementById('machine-grid');
-  document.getElementById('machine-count').textContent = machines.length;
-  if(!machines.length) {
-    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🏭</div><div class="empty-text">ยังไม่มีเครื่องจักรในระบบ</div></div>';
+function renderMachines(list) {
+  var grid = document.getElementById('machine-grid');
+  document.getElementById('machine-sub').textContent = 'เครื่องจักรทั้งหมด ' + list.length + ' เครื่อง';
+  if (!list.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1"><div class="empty"><div class="empty-ico">🏭</div><p>ยังไม่มีเครื่องจักร<br>กด "+ เครื่องจักร" เพื่อเพิ่ม</p></div></div>';
     return;
   }
-  grid.innerHTML = machines.map((m,i) => `
-    <div class="machine-card" style="animation-delay:${i*0.04}s" onclick="openMachine('${m.id}','${escapeHtml(m.name)}','${m.icon||'⚙️'}')">
-      <div class="machine-num">NO. ${String(i+1).padStart(2,'0')} · ${m.id}</div>
-      <div class="machine-icon-wrap">${m.icon||'⚙️'}</div>
-      <div class="machine-name">${escapeHtml(m.name)}</div>
-      ${m.nameTh ? `<div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">${escapeHtml(m.nameTh)}</div>`:''}
-      <div class="machine-parts-count"><span class="dot"></span>${m.partCount||0} รายการอะไหล่</div>
-      <span class="machine-arrow">›</span>
-    </div>
-  `).join('');
+  grid.innerHTML = list.map(function(m, i) {
+    return '<div class="m-card" style="animation-delay:' + (i * 0.04) + 's" onclick="openMachine(\'' + esc(m.machine_id) + '\')">' +
+      '<div class="m-card-icon">' + (m.icon || '⚙️') + '</div>' +
+      '<div class="m-card-id">' + esc(m.machine_id) + '</div>' +
+      '<div class="m-card-name">' + esc(m.machine_name) + '</div>' +
+      '<div class="m-card-loc">📍 ' + esc(m.location || '—') + '</div>' +
+      '<div class="m-card-foot">' +
+        '<span class="part-badge">🔩 ' + (m.part_count || 0) + ' รายการ</span>' +
+        '<span class="m-card-arrow">›</span>' +
+      '</div>' +
+    '</div>';
+  }).join('');
 }
 
 function filterMachines() {
-  const q = document.getElementById('search-machine').value.toLowerCase();
-  const filtered = allMachines.filter(m =>
-    m.name.toLowerCase().includes(q) || (m.nameTh||'').toLowerCase().includes(q) || m.id.toLowerCase().includes(q)
-  );
-  renderMachines(filtered);
+  var q = document.getElementById('search-m').value.toLowerCase();
+  renderMachines(_machines.filter(function(m) {
+    return (m.machine_name + m.machine_id + (m.location||'')).toLowerCase().includes(q);
+  }));
 }
 
-// ─── OPEN MACHINE → SPARE PARTS ───
-async function openMachine(id, name, icon) {
-  currentMachineId = id;
-  document.getElementById('detail-icon').textContent = icon;
-  document.getElementById('detail-name').textContent = name;
-  document.getElementById('detail-id').textContent = 'Machine Code: ' + id;
-  document.getElementById('parts-tbody').innerHTML = '<tr><td colspan="11"><div class="loader-wrap"><div class="spinner"></div></div></td></tr>';
-  showPage('spare');
+function hide(id){ var el=document.getElementById(id); if(el) el.style.display='none'; }
 
-  try {
-    const data = await apiFetch('getParts', {machineId: id});
-    allParts = data.parts || [];
-    updatePartStats();
-    renderParts(allParts);
-  } catch(e) {
-    document.getElementById('parts-tbody').innerHTML = '<tr><td colspan="11"><div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">โหลดข้อมูลไม่สำเร็จ</div></div></td></tr>';
-  }
+// ── OPEN MACHINE ─────────────────────────────────────
+function openMachine(id) {
+  _curMachine = _machines.find(function(m){ return m.machine_id === id; });
+  if (!_curMachine) return;
+
+  document.getElementById('mh-icon').textContent = _curMachine.icon || '⚙️';
+  document.getElementById('mh-name').textContent = _curMachine.machine_name;
+  document.getElementById('mh-sub').textContent  = '📍 ' + (_curMachine.location||'—') + ' | ' + (_curMachine.description||'');
+  show('page-detail');
+  loadParts(id);
 }
 
-function updatePartStats() {
-  const total = allParts.length;
-  const low = allParts.filter(p => +p.qty < +p.min).length;
-  const ok = total - low;
-  document.getElementById('detail-total').textContent = 'รายการ: ' + total;
-  document.getElementById('detail-ok').textContent = 'OK: ' + ok;
-  document.getElementById('detail-low').textContent = 'ต่ำกว่า Min: ' + low;
+function loadParts(machineId) {
+  var tbody = document.getElementById('parts-tbody');
+  tbody.innerHTML = '<tr><td colspan="12"><div class="loader"><div class="spinner"></div><p>กำลังโหลด...</p></div></td></tr>';
+  api('getParts', { machine_id: machineId }).then(function(d) {
+    _parts = d.parts || [];
+    updateChips();
+    renderParts(_parts);
+  }).catch(function(e){
+    tbody.innerHTML = '<tr><td colspan="12"><div class="empty"><div class="empty-ico">⚠️</div><p>' + e.message + '</p></div></td></tr>';
+  });
 }
+
+function updateChips() {
+  var total = _parts.length;
+  var low   = _parts.filter(function(p){ return p.stock_qty < p.min_stock; }).length;
+  var ok    = total - low;
+  document.getElementById('mh-chips').innerHTML =
+    '<span class="chip chip-blue">รายการ: ' + total + '</span>' +
+    '<span class="chip chip-green">OK: ' + ok + '</span>' +
+    (low ? '<span class="chip chip-red">⚠️ ต่ำกว่า Min: ' + low + '</span>' : '');
+}
+
+var TYPE_TAG = { Mechanical:'tag-mech', Electrical:'tag-elec', Pneumatic:'tag-pneu', Consumable:'tag-cons', Other:'tag-other' };
 
 function renderParts(parts) {
-  const tbody = document.getElementById('parts-tbody');
-  if(!parts.length) {
-    tbody.innerHTML = '<tr><td colspan="11"><div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">ยังไม่มีรายการอะไหล่</div></div></td></tr>';
+  var tbody = document.getElementById('parts-tbody');
+  if (!parts.length) {
+    tbody.innerHTML = '<tr><td colspan="12"><div class="empty"><div class="empty-ico">📦</div><p>ยังไม่มีรายการอะไหล่</p></div></td></tr>';
     return;
   }
-  tbody.innerHTML = parts.map((p,i) => {
-    const qty = +p.qty, min = +p.min, max = +p.max;
-    let status = '', statusClass = '';
-    if(qty < min) { status='⚠️ ต่ำกว่า Min'; statusClass='status-low'; }
-    else if(qty >= min && qty <= max) { status='✅ ปกติ'; statusClass='status-ok'; }
-    else { status='📈 เกิน Max'; statusClass='status-warn'; }
-
-    const typeMap = {Mechanical:'type-mech',Electrical:'type-elec',Pneumatic:'type-pneu',Consumable:'type-cons'};
-    const typeClass = typeMap[p.type] || 'type-mech';
-
-    const imgHtml = p.imageUrl
-      ? `<img class="item-img" src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.name)}" onerror="this.parentElement.innerHTML='<div class=\\'no-img\\'>📷</div>'">`
-      : `<div class="no-img">📷</div>`;
-
-    const price = p.price ? (+p.price).toLocaleString('th-TH',{minimumFractionDigits:2}) : '—';
-
-    return `<tr>
-      <td style="color:var(--text-muted);font-size:12px;font-weight:600">${i+1}</td>
-      <td>${imgHtml}</td>
-      <td><span class="item-code">${escapeHtml(p.itemCode||'—')}</span></td>
-      <td>
-        <div class="item-name">${escapeHtml(p.name)}</div>
-        ${p.note?`<div style="font-size:11px;color:var(--text-muted)">${escapeHtml(p.note)}</div>`:''}
-      </td>
-      <td style="font-weight:700;font-size:15px">${qty}</td>
-      <td style="color:var(--text-secondary)">${escapeHtml(p.unit||'ชิ้น')}</td>
-      <td><span class="price-cell">${price}</span></td>
-      <td><span class="item-type ${typeClass}">${p.type||'—'}</span></td>
-      <td style="font-size:13px;color:var(--accent3)">${min}</td>
-      <td style="font-size:13px;color:var(--danger)">${max}</td>
-      <td><span class="status-badge ${statusClass}">${status}</span></td>
-    </tr>`;
+  tbody.innerHTML = parts.map(function(p, i) {
+    var qty = p.stock_qty, mn = p.min_stock, mx = p.max_stock;
+    var qClass = qty < mn ? 'qty-low' : (qty > mx && mx > 0 ? 'qty-warn' : 'qty-ok');
+    var tClass = TYPE_TAG[p.type] || 'tag-other';
+    var imgHtml = p.image_url
+      ? '<img class="part-img" src="' + esc(p.image_url) + '" onerror="this.outerHTML=\'<div class=\\'no-img\\'>📷</div>\'">'
+      : '<div class="no-img">📷</div>';
+    var price = p.price ? Number(p.price).toLocaleString('th-TH', {minimumFractionDigits:2}) : '—';
+    return '<tr>' +
+      '<td style="color:var(--text3);font-size:11px">' + (i+1) + '</td>' +
+      '<td>' + imgHtml + '</td>' +
+      '<td><span class="mono">' + esc(p.part_number||'—') + '</span></td>' +
+      '<td><span class="fw">' + esc(p.part_name) + '</span></td>' +
+      '<td><span class="' + qClass + '">' + qty + '</span></td>' +
+      '<td style="color:var(--text2)">' + esc(p.unit||'ชิ้น') + '</td>' +
+      '<td style="font-family:var(--mono);font-size:12px">' + price + '</td>' +
+      '<td><span class="tag ' + tClass + '">' + (p.type||'—') + '</span></td>' +
+      '<td style="color:var(--green);font-size:12px">' + mn + '</td>' +
+      '<td style="color:var(--red);font-size:12px">' + mx + '</td>' +
+      '<td style="color:var(--text2);font-size:12px">' + esc(p.note||'') + '</td>' +
+      '<td><div class="td-actions">' +
+        '<button class="btn btn-blue btn-sm" onclick="openEditPartModal(\'' + esc(p.part_id) + '\')">✏️</button>' +
+        '<button class="btn btn-red btn-sm" onclick="confirmDelete(\'' + esc(p.part_id) + '\',\'' + esc(p.part_name) + '\')">🗑️</button>' +
+      '</div></td>' +
+    '</tr>';
   }).join('');
 }
 
 function filterParts() {
-  const q = document.getElementById('search-parts').value.toLowerCase();
-  const t = document.getElementById('filter-type').value;
-  const filtered = allParts.filter(p =>
-    (p.name.toLowerCase().includes(q) || (p.itemCode||'').toLowerCase().includes(q)) &&
-    (!t || p.type === t)
-  );
-  renderParts(filtered);
+  var q = document.getElementById('search-p').value.toLowerCase();
+  var t = document.getElementById('filter-type').value;
+  renderParts(_parts.filter(function(p) {
+    return (p.part_name + (p.part_number||'')).toLowerCase().includes(q) && (!t || p.type === t);
+  }));
 }
 
-// ─── ADD MACHINE ───
-async function addMachine() {
-  const id   = document.getElementById('new-machine-id').value.trim();
-  const name = document.getElementById('new-machine-name').value.trim();
-  if(!id || !name) { toast('กรุณากรอก รหัส และ ชื่อเครื่องจักร', 'error'); return; }
-  const payload = {
-    id, name,
-    nameTh: document.getElementById('new-machine-name-th').value.trim(),
-    type:   document.getElementById('new-machine-type').value,
-    icon:   document.getElementById('new-machine-icon').value.trim() || '⚙️',
-    note:   document.getElementById('new-machine-note').value.trim(),
+// ── MODALS ───────────────────────────────────────────
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ─ Machine Modal ─
+function openAddMachineModal() {
+  document.getElementById('modal-machine-title').textContent = '➕ เพิ่มเครื่องจักรใหม่';
+  document.getElementById('fm-edit-id').value = '';
+  ['fm-id','fm-name','fm-loc','fm-desc'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('fm-icon').value = '⚙️';
+  document.getElementById('fm-id').disabled = false;
+  openModal('modal-machine');
+}
+function openEditMachineModal() {
+  if (!_curMachine) return;
+  document.getElementById('modal-machine-title').textContent = '✏️ แก้ไขเครื่องจักร';
+  document.getElementById('fm-edit-id').value  = _curMachine.machine_id;
+  document.getElementById('fm-id').value        = _curMachine.machine_id;
+  document.getElementById('fm-name').value      = _curMachine.machine_name;
+  document.getElementById('fm-loc').value       = _curMachine.location || '';
+  document.getElementById('fm-desc').value      = _curMachine.description || '';
+  document.getElementById('fm-icon').value      = _curMachine.icon || '⚙️';
+  document.getElementById('fm-id').disabled     = true;
+  openModal('modal-machine');
+}
+
+function submitMachine() {
+  var editId = document.getElementById('fm-edit-id').value;
+  var mid    = document.getElementById('fm-id').value.trim();
+  var mname  = document.getElementById('fm-name').value.trim();
+  if (!mname) { toast('กรุณากรอกชื่อเครื่องจักร', 'err'); return; }
+  if (!editId && !mid) { toast('กรุณากรอก Machine ID', 'err'); return; }
+  var btn = document.getElementById('fm-submit');
+  btn.disabled = true; btn.textContent = '⏳ กำลังบันทึก...';
+
+  var action  = editId ? 'editMachine' : 'addMachine';
+  var payload = {
+    machine_id:   editId || mid,
+    machine_name: mname,
+    location:     document.getElementById('fm-loc').value.trim(),
+    description:  document.getElementById('fm-desc').value.trim(),
+    icon:         document.getElementById('fm-icon').value.trim() || '⚙️'
   };
-  try {
-    await apiFetch('addMachine', payload);
-    toast('เพิ่มเครื่องจักร "' + name + '" สำเร็จ!');
-    ['new-machine-id','new-machine-name','new-machine-name-th','new-machine-icon','new-machine-note'].forEach(id => document.getElementById(id).value='');
+
+  api(action, payload).then(function(d) {
+    if (d.error) { toast('❌ ' + d.error, 'err'); return; }
+    toast('✅ ' + (d.message || 'บันทึกสำเร็จ'), 'ok');
+    closeModal('modal-machine');
     loadMachines();
-  } catch(e) { toast('เกิดข้อผิดพลาด กรุณาลองใหม่', 'error'); }
+    if (editId && _curMachine) {
+      _curMachine.machine_name = payload.machine_name;
+      _curMachine.location     = payload.location;
+      _curMachine.description  = payload.description;
+      _curMachine.icon         = payload.icon;
+      document.getElementById('mh-icon').textContent = payload.icon;
+      document.getElementById('mh-name').textContent = payload.machine_name;
+      document.getElementById('mh-sub').textContent  = '📍 ' + (payload.location||'—') + ' | ' + (payload.description||'');
+    }
+  }).catch(function(e){ toast('❌ ' + e.message, 'err'); })
+    .finally(function(){ btn.disabled=false; btn.textContent='💾 บันทึก'; });
 }
 
-// ─── ADD SPARE PART ───
-async function addSparePart() {
-  const machineId = document.getElementById('new-part-machine').value;
-  const itemCode  = document.getElementById('new-part-code').value.trim();
-  const name      = document.getElementById('new-part-name').value.trim();
-  const qty       = document.getElementById('new-part-qty').value;
-  if(!machineId) { toast('กรุณาเลือกเครื่องจักร', 'error'); return; }
-  if(!name)      { toast('กรุณากรอกชื่อรายการอะไหล่', 'error'); return; }
-  const payload = {
-    machineId, itemCode, name, qty,
-    unit:     document.getElementById('new-part-unit').value.trim() || 'ชิ้น',
-    price:    document.getElementById('new-part-price').value,
-    type:     document.getElementById('new-part-type').value,
-    min:      document.getElementById('new-part-min').value || '0',
-    max:      document.getElementById('new-part-max').value || '0',
-    imageUrl: document.getElementById('new-part-img').value.trim(),
-    note:     document.getElementById('new-part-note').value.trim(),
+// ─ Part Modal ─
+function openAddPartModal() {
+  document.getElementById('modal-part-title').textContent = '➕ เพิ่มอะไหล่ใหม่';
+  document.getElementById('fp-edit-id').value = '';
+  ['fp-number','fp-name','fp-qty','fp-unit','fp-price','fp-min','fp-max','fp-img','fp-note'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('fp-type').value = 'Mechanical';
+  document.getElementById('fp-unit').value = 'ชิ้น';
+  resetImgPreview();
+  openModal('modal-part');
+}
+function openEditPartModal(partId) {
+  var p = _parts.find(function(x){ return x.part_id === partId; });
+  if (!p) return;
+  document.getElementById('modal-part-title').textContent = '✏️ แก้ไขอะไหล่';
+  document.getElementById('fp-edit-id').value  = p.part_id;
+  document.getElementById('fp-number').value   = p.part_number || '';
+  document.getElementById('fp-name').value     = p.part_name;
+  document.getElementById('fp-type').value     = p.type || 'Mechanical';
+  document.getElementById('fp-qty').value      = p.stock_qty;
+  document.getElementById('fp-unit').value     = p.unit || 'ชิ้น';
+  document.getElementById('fp-price').value    = p.price || '';
+  document.getElementById('fp-min').value      = p.min_stock || '';
+  document.getElementById('fp-max').value      = p.max_stock || '';
+  document.getElementById('fp-img').value      = p.image_url || '';
+  document.getElementById('fp-note').value     = p.note || '';
+  previewImg();
+  openModal('modal-part');
+}
+
+function submitPart() {
+  var editId = document.getElementById('fp-edit-id').value;
+  var name   = document.getElementById('fp-name').value.trim();
+  if (!name) { toast('กรุณากรอกชื่ออะไหล่', 'err'); return; }
+  if (!_curMachine) { toast('ไม่ได้เลือกเครื่องจักร', 'err'); return; }
+
+  var btn = document.getElementById('fp-submit');
+  btn.disabled = true; btn.textContent = '⏳ กำลังบันทึก...';
+
+  var action  = editId ? 'editPart' : 'addPart';
+  var payload = {
+    machine_id:  _curMachine.machine_id,
+    part_name:   name,
+    part_number: document.getElementById('fp-number').value.trim(),
+    stock_qty:   parseFloat(document.getElementById('fp-qty').value)   || 0,
+    unit:        document.getElementById('fp-unit').value.trim()       || 'ชิ้น',
+    price:       parseFloat(document.getElementById('fp-price').value) || 0,
+    type:        document.getElementById('fp-type').value,
+    min_stock:   parseFloat(document.getElementById('fp-min').value)   || 0,
+    max_stock:   parseFloat(document.getElementById('fp-max').value)   || 0,
+    image_url:   document.getElementById('fp-img').value.trim(),
+    note:        document.getElementById('fp-note').value.trim()
   };
-  try {
-    await apiFetch('addPart', payload);
-    toast('เพิ่มอะไหล่ "' + name + '" สำเร็จ!');
-    ['new-part-code','new-part-name','new-part-qty','new-part-unit','new-part-price','new-part-min','new-part-max','new-part-img','new-part-note']
-      .forEach(id => document.getElementById(id).value='');
-    loadMachines();
-  } catch(e) { toast('เกิดข้อผิดพลาด กรุณาลองใหม่', 'error'); }
+  if (editId) payload.part_id = editId;
+
+  api(action, payload).then(function(d) {
+    if (d.error) { toast('❌ ' + d.error, 'err'); return; }
+    toast('✅ ' + (d.message || 'บันทึกสำเร็จ'), 'ok');
+    closeModal('modal-part');
+    loadParts(_curMachine.machine_id);
+  }).catch(function(e){ toast('❌ ' + e.message, 'err'); })
+    .finally(function(){ btn.disabled=false; btn.textContent='💾 บันทึก'; });
 }
 
-function showAddPartForMachine() {
-  showPage('add');
-  if(currentMachineId) {
-    const sel = document.getElementById('new-part-machine');
-    sel.value = currentMachineId;
-  }
+function confirmDelete(partId, partName) {
+  if (!confirm('ลบอะไหล่ "' + partName + '" ใช่ไหม?\nการดำเนินการนี้ไม่สามารถย้อนกลับได้')) return;
+  api('deletePart', { part_id: partId }).then(function(d) {
+    if (d.error) { toast('❌ ' + d.error, 'err'); return; }
+    toast('🗑️ ลบอะไหล่สำเร็จ', 'warn');
+    loadParts(_curMachine.machine_id);
+  });
 }
 
-function populateMachineSelect() {
-  const sel = document.getElementById('new-part-machine');
-  const current = sel.value;
-  sel.innerHTML = '<option value="">-- เลือกเครื่องจักร --</option>' +
-    allMachines.map(m => `<option value="${m.id}">${m.id} — ${m.name}</option>`).join('');
-  if(current) sel.value = current;
+// ─ Image Preview ─
+function previewImg() {
+  var url = document.getElementById('fp-img').value.trim();
+  var box = document.getElementById('img-preview');
+  if (!url) { resetImgPreview(); return; }
+  box.innerHTML = '<img src="' + url + '" style="width:100%;height:100%;object-fit:cover" onerror="resetImgPreview()">';
+}
+function resetImgPreview() {
+  document.getElementById('img-preview').innerHTML = '<div class="img-preview-empty">🖼️<br>วาง URL รูปภาพแล้วจะแสดงตัวอย่างที่นี่</div>';
 }
 
-function escapeHtml(s) {
-  if(!s) return '';
+// ─ Toast ─
+function toast(msg, type) {
+  type = type || 'ok';
+  var el  = document.getElementById('toast');
+  var ico = { ok:'✅', err:'❌', warn:'⚠️' };
+  el.className = 'toast ' + type;
+  document.getElementById('toast-ico').textContent = ico[type] || '';
+  document.getElementById('toast-msg').textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(function(){ el.classList.remove('show'); }, 3500);
+}
+
+// ─ Utils ─
+function esc(s) {
+  if (!s) return '';
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ─── MOCK DATA (Demo when URL not set) ───
-function getMockData(action, data) {
-  if(action === 'getMachines') return Promise.resolve({ machines: [
-    {id:'M01', name:'Weighing Machine', nameTh:'เครื่องชั่ง', icon:'⚖️', partCount:8},
-    {id:'M02', name:'Auto Debone (Foodmate)', nameTh:'เครื่อง Debone', icon:'🔄', partCount:15},
-    {id:'M03', name:'Toridas', nameTh:'Toridas', icon:'🏭', partCount:6},
-    {id:'M04', name:'CCM Machine', nameTh:'เครื่อง CCM', icon:'📦', partCount:12},
-    {id:'M05', name:'X-RAY Inspection', nameTh:'เครื่อง X-RAY', icon:'🔬', partCount:9},
-    {id:'M06', name:'Multitray', nameTh:'Multitray', icon:'🗂️', partCount:11},
-    {id:'M07', name:'Freezer', nameTh:'ตู้แช่แข็ง', icon:'❄️', partCount:7},
-    {id:'M08', name:'I-CUT', nameTh:'เครื่องตัด', icon:'✂️', partCount:14},
-    {id:'M09', name:'Belt Grader', nameTh:'Belt Grader', icon:'🔗', partCount:10},
-    {id:'M10', name:'Injector', nameTh:'เครื่องฉีด', icon:'💉', partCount:5},
-    {id:'M11', name:'Metal Detector', nameTh:'เครื่องตรวจโลหะ', icon:'🔍', partCount:6},
-    {id:'M12', name:'Vacuum Pack', nameTh:'เครื่องซีลสุญญากาศ', icon:'🫙', partCount:8},
-    {id:'M13', name:'Washing Machine', nameTh:'เครื่องล้าง', icon:'🚿', partCount:4},
-    {id:'M14', name:'Packing Parts', nameTh:'อะไหล่ Packing', icon:'📤', partCount:20},
-    {id:'M15', name:'Tape Sealer', nameTh:'เครื่องรัดเทปใส', icon:'🎁', partCount:6},
-    {id:'M16', name:'IFOOMA', nameTh:'เครื่อง IFOOMA', icon:'⚙️', partCount:9},
-    {id:'M17', name:'Swing Loader', nameTh:'Swing Loader', icon:'🔩', partCount:7},
-    {id:'M18', name:'Floor Polisher', nameTh:'เครื่องขัดพื้น', icon:'🧹', partCount:3},
-    {id:'M19', name:'Xiajin Grinder', nameTh:'เครื่องบด Xiajin', icon:'🪛', partCount:8},
-  ]});
+// close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(function(o) {
+  o.addEventListener('click', function(e){ if (e.target === o) o.classList.remove('open'); });
+});
 
-  if(action === 'getParts') return Promise.resolve({ parts: [
-    {itemCode:'SKF-6205', name:'Bearing 6205 2RS', qty:8, unit:'ชิ้น', price:350, type:'Mechanical', min:5, max:20, imageUrl:'', note:''},
-    {itemCode:'BLT-A78', name:'V-Belt A78', qty:3, unit:'เส้น', price:180, type:'Mechanical', min:4, max:15, imageUrl:'', note:''},
-    {itemCode:'SEL-TC40', name:'Oil Seal TC40x60x10', qty:12, unit:'ชิ้น', price:90, type:'Mechanical', min:5, max:20, imageUrl:'', note:''},
-    {itemCode:'ELC-CB01', name:'Circuit Breaker 10A', qty:2, unit:'ชิ้น', price:450, type:'Electrical', min:2, max:10, imageUrl:'', note:''},
-    {itemCode:'PNU-FRL01', name:'FRL Unit 1/4 inch', qty:1, unit:'ชุด', price:1200, type:'Pneumatic', min:1, max:3, imageUrl:'', note:''},
-    {itemCode:'CSM-GRS01', name:'Grease Lithium EP2', qty:5, unit:'หลอด', price:120, type:'Consumable', min:3, max:10, imageUrl:'', note:''},
-    {itemCode:'ELC-RLY01', name:'Relay MY2 24VDC', qty:0, unit:'ชิ้น', price:280, type:'Electrical', min:3, max:10, imageUrl:'', note:''},
-    {itemCode:'BRG-6004', name:'Bearing 6004 ZZ', qty:10, unit:'ชิ้น', price:220, type:'Mechanical', min:5, max:20, imageUrl:'', note:''},
-  ]});
-
-  if(action === 'addMachine' || action === 'addPart') return Promise.resolve({success:true});
-  return Promise.resolve({});
-}
-
-// ─── INIT ───
+// ─ INIT ─
 loadMachines();
 </script>
 </body>
