@@ -534,7 +534,7 @@ code{background:rgba(0,0,0,.4);border-radius:4px;padding:1px 6px;font-family:var
 // ═══════════════════════════════════════════════════════
 //  ⚙️  CONFIG — แก้ไข URL นี้ให้ตรงกับ Apps Script ของคุณ
 // ═══════════════════════════════════════════════════════
-var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxc2ETrfcpIobedLVwj40BNTFCTEQABSuB0chLe8eCSY3VRY7zCJqkJd4o1cm6ORBfO/exec';
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz_ZfeuTgRgTJWJXG6Ao11b1l6aBfJTrg9kT_8-5Zg2zmN5lSv7ch9nneNaKo-VWD_h/exec';
 // ═══════════════════════════════════════════════════════
 
 var _machines = [];
@@ -543,7 +543,7 @@ var _curMachine = null;
 
 // ── API ──────────────────────────────────────────────
 function api(action, payload) {
-  if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') return mockApi(action, payload);
+  if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbz_ZfeuTgRgTJWJXG6Ao11b1l6aBfJTrg9kT_8-5Zg2zmN5lSv7ch9nneNaKo-VWD_h/exec') return mockApi(action, payload);
   var p = new URLSearchParams({ action: action, payload: JSON.stringify(payload || {}) });
   return fetch(SCRIPT_URL + '?' + p)
     .then(function(r){ return r.text(); })
@@ -596,7 +596,7 @@ function loadMachines() {
   grid.innerHTML = '<div style="grid-column:1/-1"><div class="loader"><div class="spinner"></div><p>กำลังโหลด...</p></div></div>';
   api('getMachines').then(function(d) {
     _machines = d.machines || [];
-    if (SCRIPT_URL !== 'YOUR_APPS_SCRIPT_URL_HERE') hide('cfg-alert');
+    if (SCRIPT_URL !== 'https://script.google.com/macros/s/AKfycbz_ZfeuTgRgTJWJXG6Ao11b1l6aBfJTrg9kT_8-5Zg2zmN5lSv7ch9nneNaKo-VWD_h/exec') hide('cfg-alert');
     document.getElementById('machine-sub').textContent = 'เครื่องจักรทั้งหมด ' + _machines.length + ' เครื่อง';
     renderMachines(_machines);
   }).catch(function(e){
